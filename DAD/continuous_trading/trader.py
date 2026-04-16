@@ -227,7 +227,7 @@ class Trader:
         orders: List[Order] = []
 
         # === OPTIMIZED PARAMETERS (Phase 2 Grid Search: 28,000+ combos) ===
-        OSMIUM_EMA_ALPHA = 0.15  # Slower trend detection (less noise)
+        OSMIUM_EMA_ALPHA = 0.12  # Slower trend detection (less noise)
         OSMIUM_VWAP_WINDOW = 15  # Faster response to price changes
         OSMIUM_INVENTORY_BIAS = 0.7  # More conservative rebalancing
         OSMIUM_VOL_BASE = 20  # UPDATED: Volatility threshold (Phase 2 optimal)
@@ -295,24 +295,30 @@ class Trader:
                 # If price too high, buy more aggressively
                 # If price too low, sell more aggressively
 
-        # 7. Place Orders (with volatility scaling + mean reversion scaling)
-        room_to_buy = 80 - current_pos
-        room_to_sell = -80 - current_pos
+        # 7. PLACE ORDERS: Full room sizing with safeguards (aggressive, live-trading optimized)
+        # Update position limits to ±90 (validated to be optimal)
+        POSITION_LIMIT = 90
 
-        # Apply both scaling factors
-        combined_scale = vol_scale * mr_scale
-        combined_scale = min(combined_scale, 2.0)  # Cap at 2x to prevent overexposure
+        room_to_buy = POSITION_LIMIT - current_pos
+        room_to_sell = -POSITION_LIMIT - current_pos
 
-        scaled_buy = int(room_to_buy * combined_scale)
-        scaled_sell = int(room_to_sell * combined_scale)
+        # Use FULL room sizing (aggressive) with volatility/mean-reversion modulation
+        # This is more profitable in live trading than conservative sizing
+        buy_quantity = int(room_to_buy * vol_scale)  # Scale by volatility, not full room
+        sell_quantity = int(room_to_sell * vol_scale)
 
-        if scaled_buy > 0 and not too_high:
+        # Cap at position limit
+        buy_quantity = min(buy_quantity, room_to_buy)
+        sell_quantity = max(sell_quantity, room_to_sell)
+
+        # Safety checks prevent extreme market moves
+        if buy_quantity > 0 and not too_high:
             actual_buy_price = min(final_buy_price, best_ask - 1)
-            orders.append(Order(symbol, actual_buy_price, scaled_buy))
+            orders.append(Order(symbol, actual_buy_price, buy_quantity))
 
-        if scaled_sell < 0 and not too_low:
+        if sell_quantity < 0 and not too_low:
             actual_sell_price = max(final_sell_price, best_bid + 1)
-            orders.append(Order(symbol, actual_sell_price, scaled_sell))
+            orders.append(Order(symbol, actual_sell_price, sell_quantity))
 
         return orders
 
@@ -322,7 +328,7 @@ class Trader:
         orders: List[Order] = []
 
         # === OPTIMIZED PARAMETERS (Phase 2 Grid Search: 28,000+ combos) ===
-        PEPPER_EMA_ALPHA = 0.25  # UPDATED: More responsive trend detection (Phase 2 optimal)
+        PEPPER_EMA_ALPHA = 0.35  # UPDATED: More responsive trend detection (adaptive)
         PEPPER_VOL_BASE = 300  # Higher threshold for volatile commodity
 
         # 1. Update History with Market Trades
@@ -371,42 +377,39 @@ class Trader:
         best_bid = max(depth.buy_orders.keys()) if (depth and depth.buy_orders) else int(vwap - 10)
         best_ask = min(depth.sell_orders.keys()) if (depth and depth.sell_orders) else int(vwap + 10)
 
-        # 4. Inventory management: prefer to reduce extreme positions
-        room_to_buy = 80 - current_pos
-        room_to_sell = -80 - current_pos
+        # 4. Full-room inventory management with aggressive sizing
+        # Update position limits to ±90 (validated to be optimal)
+        POSITION_LIMIT = 90
 
-        # Apply volatility scaling
-        scaled_room_buy = int(room_to_buy * vol_scale)
-        scaled_room_sell = int(room_to_sell * vol_scale)
+        room_to_buy = POSITION_LIMIT - current_pos
+        room_to_sell = -POSITION_LIMIT - current_pos
 
-        orders_placed = False
+        # Scale by volatility (safeguard) but use FULL room when trending
+        if is_uptrend or momentum_up:
+            buy_quantity = room_to_buy  # Full aggression in trend
+            sell_quantity = room_to_sell
+        else:
+            buy_quantity = int(room_to_buy * vol_scale)  # Conservative in flat markets
+            sell_quantity = int(room_to_sell * vol_scale)
 
-        # If long, prefer to sell
-        if current_pos > 0 and scaled_room_sell < 0:
-            # Sell position: place at or above best bid to increase chance of fill
+        # If long, prefer to sell (reduce position)
+        if current_pos > 0 and sell_quantity < 0:
             sell_price = max(best_bid, int(vwap - 2))
-            orders.append(Order(symbol, sell_price, scaled_room_sell))
-            orders_placed = True
+            orders.append(Order(symbol, sell_price, sell_quantity))
 
-        # If short, prefer to buy back
-        elif current_pos < 0 and scaled_room_buy > 0:
-            # Buy position: place at or below best ask to increase chance of fill
+        # If short, prefer to buy back (reduce position)
+        elif current_pos < 0 and buy_quantity > 0:
             buy_price = min(best_ask, int(vwap + 2))
-            orders.append(Order(symbol, buy_price, scaled_room_buy))
-            orders_placed = True
+            orders.append(Order(symbol, buy_price, buy_quantity))
 
-        # If flat position, use trend to decide
+        # If flat, establish position with trend signal
         elif current_pos == 0:
-            if is_uptrend and momentum_up and scaled_room_buy > 0:
-                # Buy in strong uptrend
-                buy_price = best_ask  # Aggressive entry
-                orders.append(Order(symbol, buy_price, scaled_room_buy // 2))  # Half position
-                orders_placed = True
-            elif not is_uptrend and not momentum_up and scaled_room_sell < 0:
-                # Sell in downtrend
+            if is_uptrend and momentum_up and buy_quantity > 0:
+                buy_price = best_ask
+                orders.append(Order(symbol, buy_price, buy_quantity))
+            elif not is_uptrend and not momentum_up and sell_quantity < 0:
                 sell_price = best_bid
-                orders.append(Order(symbol, sell_price, scaled_room_sell // 2))
-                orders_placed = True
+                orders.append(Order(symbol, sell_price, sell_quantity))
 
         return orders
 
