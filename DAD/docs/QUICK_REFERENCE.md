@@ -135,11 +135,11 @@ START
 |--------|------|--------|-----------------|
 | ±40/±40 | Low | +203k (102%) | Very safe |
 | ±60/±60 | Med-Low | +245k (123%) | Conservative |
-| ±80/±80 | Medium | +286k (143%) | **← Phase 2** |
-| ±90/±90 | Medium | +307k (153%) | Best profit |
-| ±100/±100 | High | ~320k (160%) | Risky |
+| ±80/±80 | Medium | +438k (219%) | Phase 2 Proven |
+| ±90/±90 | Medium | +439k (220%) | **← Current Optimal** |
+| ±100/±100 | High | ~450k (225%) | Risky |
 
-**Our Recommendation**: ±80/±80 (proven) or ±90/±90 (new optimal)
+**Our Recommendation**: ±80/±80 (proven baseline) or ±90/±90 (current optimal with clearing-level sizing)
 
 ---
 
@@ -226,15 +226,15 @@ analysis/
 
 ## Performance Benchmarks
 
-**Expected baseline (±80/±80)**:
-- Portfolio Value: 286,351 XIRECs (143% of target)
-- Fill Rate: 60-70%
+**Expected baseline (±90/±90 with clearing-level sizing)**:
+- Portfolio Value: 438,650 XIRECs (219% of target)
+- Fill Rate: 65-75%
 - Position Limit Rejections: 0
-- Consistency: Std Dev < 1% of mean
+- Consistency: 1.47% CoV (very tight)
 
 **If you see**:
-- Portfolio > 300,000 → Excellent! 🎉
-- Portfolio 200,000-250,000 → Good ✓
+- Portfolio > 430,000 → Excellent! On target ✅
+- Portfolio 200,000-250,000 → Good, but below optimal ✓
 - Portfolio < 200,000 → Investigate ⚠️
 
 ---
@@ -274,6 +274,30 @@ python run_backtest_loops.py --iterations 20
 - **Acceptable Fill Rate**: > 50%
 - **Maximum Rejections**: 0 (should never happen)
 - **Good Consistency**: Std Dev < 5% of mean
+
+---
+
+## Clearing-Level Order Sizing
+
+**What Is It?**
+
+Orders are sized based on **cumulative order book depth**, not position room:
+- Analyze: "How much volume to nudge the book to my target price?"
+- Place: Exactly that volume (+ 10% safety buffer)
+- Result: Capital-efficient execution, graceful thin-market handling
+
+**Example**:
+- Position: -35, Room to buy: 125 units (old approach places 100)
+- Order book cumulative depth shows: 45 units to clear through best_ask
+- New approach: Place 50 units (45 + 10% buffer)
+- Benefit: 50% smaller order, better fills, less market impact
+
+**Why It Matters**:
+- Less capital needed per trade
+- Better execution in thin markets (auto right-sizes down)
+- Principles-based (market microstructure) instead of heuristic (position room)
+
+**See Also**: `CLEARING_LEVEL_ARCHITECTURE.md` for technical details
 
 ---
 
