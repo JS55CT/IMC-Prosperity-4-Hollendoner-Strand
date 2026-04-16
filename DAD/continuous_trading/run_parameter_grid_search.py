@@ -259,7 +259,7 @@ def run_grid_search(test_type="full", iterations=100):
     print("-" * 140)
 
     for rank, result in enumerate(sorted_results[:20], 1):  # Top 20
-        rank_marker = "🏆" if rank == 1 else "  "
+        rank_marker = "[BEST]" if rank == 1 else "      "
         ema_str = f"{result['ema_osmium']:.2f}/{result['ema_pepper']:.2f}"
         pos_str = f"±{result['pos_osmium']}/±{result['pos_pepper']}"
 

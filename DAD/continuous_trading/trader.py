@@ -322,7 +322,7 @@ class Trader:
         orders: List[Order] = []
 
         # === OPTIMIZED PARAMETERS (Phase 2 Grid Search: 28,000+ combos) ===
-        PEPPER_EMA_ALPHA = 0.3  # UPDATED: More responsive trend detection (Phase 2 optimal)
+        PEPPER_EMA_ALPHA = 0.25  # UPDATED: More responsive trend detection (Phase 2 optimal)
         PEPPER_VOL_BASE = 300  # Higher threshold for volatile commodity
 
         # 1. Update History with Market Trades

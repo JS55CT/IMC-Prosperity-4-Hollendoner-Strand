@@ -146,7 +146,7 @@ def run_comprehensive_test(iterations=100, test_one=None, output_file=None):
     print("-" * 120)
 
     for rank, result in enumerate(sorted_results, 1):
-        rank_marker = "🏆" if rank == 1 else "  "
+        rank_marker = "[#1]" if rank == 1 else "     "
         print(
             f"{rank_marker} {rank:<4} {result['config']:<35} "
             f"{result['mean_pnl']:>15,.0f} {result['median_pnl']:>15,.0f} "
