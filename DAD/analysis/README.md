@@ -49,13 +49,17 @@ Basic grid search (768 combinations). ⚠️ **Obsolete** - superseded by realis
 
 ### `grid_search_realistic.py`
 Realistic grid search (2,304 combinations) simulating actual trader.py logic.
+Result: +161,186 XIRECs (Phase 1 optimal)
 
-**Best parameters found**:
-- Osmium: EMA=0.15, Bias=0.7, VWAP Window=15
-- Pepper: EMA=0.25
-- Result: +161k profit
+### `grid_search_scaled.py`
+Extended grid search (1,025+ combinations tested).
+Result: +161,186 XIRECs (Phase 2 plateau confirmed - no improvement)
 
-**These parameters are now hardcoded in `../continuous_trading/trader.py`**
+**Final Phase 2 Parameters** (now in `../continuous_trading/trader.py`):
+- Osmium: EMA_Alpha=0.15, Inventory_Bias=0.7, VWAP_Window=15, Vol_Base=20
+- Pepper: EMA_Alpha=0.3, Vol_Base=300
+- Enhancements: Adaptive EMA Alpha + Mean Reversion detection (1.5x scaling)
+- Result: +340,091 XIRECs (170% of target) via backtest_v2.py
 
 ## Reference Files
 

@@ -11,9 +11,10 @@ The main trading algorithm that runs automatically during Round 1 (Apr 14-17).
 - Runs every minute for 72 hours automatically
 - Expected profit: +340,091 XIRECs (170% of 200k target)
 
-**Optimized parameters** (from grid search):
-- Osmium: EMA=0.15, Inventory Bias=0.7, VWAP Window=15
-- Pepper: EMA=0.25
+**Phase 2 Optimized Parameters** (grid search plateau validated):
+- Osmium: EMA_Alpha=0.15, Inventory_Bias=0.7, VWAP_Window=15, Vol_Base=20
+- Pepper: EMA_Alpha=0.3, Vol_Base=300
+- Enhancements: Adaptive EMA + Mean Reversion detection (1.5x scaling)
 
 ### `backtest_v2.py`
 Validates the trading strategy on historical data.

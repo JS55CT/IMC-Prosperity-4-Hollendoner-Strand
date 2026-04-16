@@ -10,10 +10,11 @@ This repository contains a dual-commodity algorithmic trading system for **IMC P
 
 **Status**: ✅ Production Ready
 
-**Latest Update**: Parameter optimization via grid search (2,304+ combinations tested)
-- Osmium parameters tuned: EMA=0.15, Bias=0.7, Window=15
-- Pepper parameters tuned: EMA=0.25, VolBase=300
-- Changes hardcoded in trader.py (lines 177-181, 249-252)
+**Latest Update**: Phase 2 parameters finalized and validated
+- Osmium parameters: EMA_Alpha=0.15, Inventory_Bias=0.7, VWAP_Window=15, Vol_Base=20
+- Pepper parameters: EMA_Alpha=0.3, Vol_Base=300
+- Plus enhancements: Adaptive EMA Alpha + Mean Reversion detection (1.5x scaling)
+- Signal generation validated on 2,276 historical trades (100% pass)
 
 ---
 

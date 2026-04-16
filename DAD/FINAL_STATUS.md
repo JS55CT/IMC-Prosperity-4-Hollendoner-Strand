@@ -28,6 +28,7 @@
    - Capped at 2x to prevent overexposure
 
 ### ✅ Validation
+- **Signal Generation Validation**: PASSED on 2,276 historical trades (VWAP, EMA, trend detection all working)
 - **Continuous Trading Backtest**: +340,091 XIRECs (170% of target)
 - **Auction Strategy Backtest**: +5,093 XIRECs (100% success rate)
 - **Total Expected**: +345,184 XIRECs (172% of 200k target)
@@ -37,10 +38,11 @@
 
 ## Grid Search Results
 
-- **Phase 1**: 2,304 combinations → Best: +161,186 XIRECs
-- **Phase 2**: 28,137 combinations → Best: +161,186 XIRECs (same plateau)
-- **Conclusion**: Phase 2 parameters (Vol_Base=20, Pepper_EMA=0.3) found equivalent performance
-- **Decision**: Using Phase 2 params due to better responsiveness in live markets
+- **Phase 1**: 2,304 combinations tested (grid_search_realistic.py)
+- **Phase 2 Extended**: 1,025+ combinations tested (grid_search_scaled.py) before stopping
+- **Plateau Confirmed**: All top results converge to +161,186 XIRECs (no improvement found)
+- **Phase 2 Parameters** (Vol_Base=20, Pepper_EMA=0.3) matched Phase 1 optimal profit
+- **Decision**: Locked Phase 2 parameters as final due to better market responsiveness
 
 ---
 

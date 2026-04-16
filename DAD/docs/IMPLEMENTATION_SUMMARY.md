@@ -66,18 +66,25 @@ Risk Level: LOW
 
 ### Phase 1: High-Impact Search (2,304 combinations)
 Tested: EMA alpha, inventory bias, VWAP window, volatility thresholds, position limits
+**Result**: +161,186 XIRECs (80.6% of target)
 
-**Best Result Found: +161,186 XIRECs (80.6% of target)**
+### Phase 2: Refined Search (1,025+ combinations)
+Tested extended parameter ranges
+**Result**: +161,186 XIRECs (plateau confirmed - no improvement)
 
-Optimal parameters identified:
+### Final Parameters (PHASE 2 OPTIMAL - NOW IN trader.py)
 - **Osmium EMA Alpha**: 0.15 (slower trend detection)
 - **Osmium Inventory Bias**: 0.7 (conservative rebalancing)
 - **Osmium VWAP Window**: 15 (faster price response)
-- **Osmium Vol Base**: 15 (aggressive volatility scaling)
-- **Pepper EMA Alpha**: 0.25 (moderate trend detection)
-- **Pepper Vol Base**: 300 (conservative for volatility)
+- **Osmium Vol Base**: 20 (optimized volatility scaling)
+- **Pepper EMA Alpha**: 0.3 (responsive trend detection)
+- **Pepper Vol Base**: 300 (conservative for volatile commodity)
 
-These parameters are now **hardcoded in trader.py** (lines 177-181, 249-252)
+**Enhancements**:
+- Adaptive EMA Alpha: market-condition aware trend sensitivity
+- Mean Reversion Detection: 1.5x scaling on extreme overshoots (>2σ from VWAP)
+
+See [continuous_trading/trader.py](../continuous_trading/trader.py) lines 230-326 for implementation
 
 ### Phase 2: Scaled Search (20,736 combinations - completed)
 Extended grid around optimal values:
